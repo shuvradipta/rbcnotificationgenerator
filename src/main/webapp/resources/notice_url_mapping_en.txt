@@ -1,0 +1,7 @@
+Down_Interac,Technical Issues with Interac e-Transfer service,/onlinebanking/bankingusertips/notices/Down_Interac.html,true,true
+Maint_Weekly,Weekend maintenance to affect Online/Mobile Banking,/onlinebanking/bankingusertips/notices/Maint_Weekly.html,true,true
+Maint_SMS,Maintenance to affect text messages from RBC Royal Bank on Friday,/onlinebanking/bankingusertips/notices/Maint_SMS.html,true,true
+Notice_Phishing,Be aware of email and text scams,/onlinebanking/bankingusertips/notices/Notice_Phishing.html,true,true
+technical_PEV,Technical issues with Pay Employees and Vendors service,/onlinebanking/bankingusertips/notices/technical_PEV.html,true,true
+Maint_MPB,Maintenance on Pay Multiple Bills feature on Thursday,/onlinebanking/bankingusertips/notices/Maint_MBP.html,true,true
+BestBuyMaint,Maintenance to affect Best Buy catalogue in RBC Rewards this weekend,/onlinebanking/bankingusertips/notices/BestBuyMaint.html,true,true

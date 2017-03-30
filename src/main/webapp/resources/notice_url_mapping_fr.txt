@@ -1,0 +1,7 @@
+Down_Interac,Difficultés techniques avec le service Virement Interac,/banqueendirect/bankingusertips/notices/Down_Interac.html,true,true
+Maint_Weekly,Entretien du système ce weekend,/banqueendirect/bankingusertips/notices/Maint_Weekly.html,true,true
+Maint_SMS,Maintenance touchant les messages texte en provenance de RBC Banque Royale ce vendredi,/banqueendirect/bankingusertips/notices/Maint_SMS.html,true,true
+Notice_Phishing,Méfiez-vous des arnaques par messages textes et par courriel,/banqueendirect/bankingusertips/notices/Notice_PhishingFr.html,true,true
+technical_PEV,Difficultés techniques touchant le Service de paiement des employés et des fournisseurs,/banqueendirect/bankingusertips/notices/technical_PEV.html,true,true
+Maint_MPB,Maintenance de la fonction de paiement de factures multiples ce jeudi,/banqueendirect/bankingusertips/notices/Maint_MPB.html,true,true
+BestBuyMaint,Maintenance touchant le catalogue Best Buy de RBC Récompenses prévue cette fin de semaine,/banqueendirect/bankingusertips/notices/BestBuyMaintFR.html,true,true
