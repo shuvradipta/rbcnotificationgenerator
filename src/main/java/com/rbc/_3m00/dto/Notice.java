@@ -1,6 +1,12 @@
 package com.rbc._3m00.dto;
 
-public class Notice {
+import java.io.Serializable;
+
+public class Notice implements Serializable{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 7571592626361600046L;
 	private String key = "";
 	private String noticeText = "";
 	private String url = "";
@@ -8,6 +14,9 @@ public class Notice {
 	private String startTime = "";
 	private String expiryTime = "";
 	private boolean kioskInd = false;
+	
+	private boolean active = false;
+	
 	public String getNoticeText() {
 		return noticeText;
 	}
@@ -72,5 +81,11 @@ public class Notice {
 	}
 	public void setKey(String key) {
 		this.key = key;
+	}
+	public boolean isActive() {
+		return active;
+	}
+	public void setActive(boolean active) {
+		this.active = active;
 	}
 }

@@ -8,16 +8,16 @@ import java.util.ArrayList;
 
 import com.rbc._3m00.dto.Notice;
 
-public class NoticeMappingInitializer {
+public class NoticeMappingHandler {
 	
 	private static final int NOTICE_MAPPING_COLUMN_COUNT = 5;
-	private static NoticeMappingInitializer instance = new NoticeMappingInitializer();
+	private static NoticeMappingHandler instance = new NoticeMappingHandler();
 	
-	private NoticeMappingInitializer(){
+	private NoticeMappingHandler(){
 		//private Constructor
 	}
 	
-	public static NoticeMappingInitializer getInstance(){
+	public static NoticeMappingHandler getInstance(){
 		return instance;
 	}
 	
@@ -47,5 +47,6 @@ public class NoticeMappingInitializer {
 		}
 		return notices;
 	}
+	
 
 }

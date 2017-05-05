@@ -7,6 +7,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
+
 import com.rbc._3m00.dto.Notice;
 
 public class ServiceNoticeJSGenerator {
@@ -83,5 +84,5 @@ public class ServiceNoticeJSGenerator {
 		System.out.println("ServiceNoticeJSGenerator.initFile() :: \n" + initializedCode);
 		return initializedCode;
 	}
-
+	
 }

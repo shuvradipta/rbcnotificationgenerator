@@ -60,6 +60,10 @@
 <!-- Main Body : BEGIN -->
 <c:set var="htmlGenAppUrl" value="${appConfigMappings.HTMLGENAPPURL}"></c:set>
 <c:set var="mobileGenAppUrl" value="${appConfigMappings.MOBILEGENAPPURL}"></c:set>
+<c:set var="enKey" value="en_"></c:set>
+<c:set var="frKey" value="fr_"></c:set>
+
+
 
 <div class="container-fluid text-center">
 	<div class="row content">
@@ -83,11 +87,41 @@
 			  	<strong>Error!</strong> There was some error while processing the input.
 			</div>
 			</c:if>
-			<h1>Work with Service Notices</h1>
-			<p class="text-info">
+			<h1 style="text-decoration: underline;">Message List</h1>
+			<!-- <p class="text-info">
 				Please check the messages you want to add in the Service Notice
-			</p>
+			</p> -->
+			
+			<div class="container">
+				<div class="row">
+					<div class="table-responsive">
+						<table class="table table-condensed table-bordered col-sm-8 bodyContentText">
+							<thead>
+								<tr>
+									<c:forEach var="columnName" items="${tableColumnNames}">
+										<th>${columnName}</th>
+									</c:forEach>
+								</tr>
+							</thead>
+							<tbody>
+								<c:forEach items="${activeNoticeMappings}" var="notice">
+									<tr>
+										<c:set var="noticeEnKeyUrl" value="${enKey}${notice.key}url"></c:set>
+										<c:set var="noticeFrKeyUrl" value="${frKey}${notice.key}url"></c:set>
+										<td><a href="${htmlGenAppUrl}?enFileName=${noticeMap[noticeEnKeyUrl]}&frFileName=${noticeMap[noticeFrKeyUrl]}&startTime={{ snCtrl.startTime${notice.key}}}&expiryTime={{ snCtrl.expiryTime${notice.key} }}">${notice.noticeText}</a></td>
+										<!-- <td><c:if test="${notice.publicInd}"><span class="glyphicon glyphicon-check"></span></c:if></td> -->
+										<td>${notice.startTime}</td>
+										<td>${notice.expiryTime}</td>
+										<td><input type="checkbox" name="isIncluded${notice.key}" ng-click="snCtrl.manageNotice('${notice.key}')" ng-model="checkBox${notice.key}" ng-disabled="serviceNoticeForm.startTime${notice.key}.$error.datetimelocal || !serviceNoticeForm.startTime${notice.key}.$dirty || !serviceNoticeForm.expiryTime${notice.key}.$dirty || serviceNoticeForm.expiryTime${notice.key}.$error.datetimelocal"/></td>
+									</tr>
+								</c:forEach>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
 			<form action="/ServiceNoticeServlet" method="post" name="serviceNoticeForm">
+			<p><h1 style="text-decoration: underline;">Notices Leaderboard</h1></p>
 			<div class="container">
 				<div class="row">
 					<div class="table-responsive">
@@ -102,15 +136,17 @@
 							<tbody>
 								<c:forEach items="${enNoticeMappings}" var="notice">
 									<tr>
-										<td>${notice.noticeText}</td>
-										<td><c:if test="${notice.publicInd}"><span class="glyphicon glyphicon-check"></span></c:if></td>
+										<c:set var="noticeEnKeyUrl" value="${enKey}${notice.key}url"></c:set>
+										<c:set var="noticeFrKeyUrl" value="${frKey}${notice.key}url"></c:set>
+										<td><a href="${htmlGenAppUrl}?enFileName=${noticeMap[noticeEnKeyUrl]}&frFileName=${noticeMap[noticeFrKeyUrl]}&startTime={{ snCtrl.startTime${notice.key}}}&expiryTime={{ snCtrl.expiryTime${notice.key} }}">${notice.noticeText}</a></td>
+										<!-- <td><c:if test="${notice.publicInd}"><span class="glyphicon glyphicon-check"></span></c:if></td> -->
 										<td><input type="datetime-local" name="startTime${notice.key}" ng-model="snCtrl.startTime${notice.key}" min="${serverDateTime}" />
 										<div role="alert">
 									    <span class="error" ng-show="serviceNoticeForm.startTime${notice.key}.$error.datetimelocal">Not a valid date!</span></div></td>
 										<td><input type="datetime-local" name="expiryTime${notice.key}" ng-model="snCtrl.expiryTime${notice.key}" min="${serverDateTime}"/>
 										<div role="alert">
 									    <span class="error" ng-show="serviceNoticeForm.expiryTime${notice.key}.$error.datetimelocal">Not a valid date!</span></div></td>
-										<td><c:if test="${notice.kioskInd}"><span class="glyphicon glyphicon-check"></span></c:if></td>
+										<!-- <td><c:if test="${notice.kioskInd}"><span class="glyphicon glyphicon-check"></span></c:if></td> -->
 										<td><input type="checkbox" name="isIncluded${notice.key}" ng-click="snCtrl.manageNotice('${notice.key}')" ng-model="checkBox${notice.key}" ng-disabled="serviceNoticeForm.startTime${notice.key}.$error.datetimelocal || !serviceNoticeForm.startTime${notice.key}.$dirty || !serviceNoticeForm.expiryTime${notice.key}.$dirty || serviceNoticeForm.expiryTime${notice.key}.$error.datetimelocal"/></td>
 									</tr>
 								</c:forEach>
