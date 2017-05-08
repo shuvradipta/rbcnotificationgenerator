@@ -15,7 +15,7 @@ public class Notice implements Serializable{
 	private String expiryTime = "";
 	private boolean kioskInd = false;
 	
-	private boolean active = false;
+	private String status = "";
 	
 	public String getNoticeText() {
 		return noticeText;
@@ -82,10 +82,17 @@ public class Notice implements Serializable{
 	public void setKey(String key) {
 		this.key = key;
 	}
-	public boolean isActive() {
-		return active;
+	public String getStatus() {
+		return status;
 	}
-	public void setActive(boolean active) {
-		this.active = active;
+	public void setStatus(String status) {
+		this.status = status;
 	}
+	@Override
+	public boolean equals(Object arg0) {
+		Notice notice = (Notice)arg0;
+		return this.key.equalsIgnoreCase(notice.getKey());
+	}
+	
+	
 }

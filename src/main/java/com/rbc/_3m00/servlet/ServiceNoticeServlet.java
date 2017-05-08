@@ -4,9 +4,11 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.TimeZone;
@@ -36,7 +38,9 @@ public class ServiceNoticeServlet extends HttpServlet {
 	
 	private static final String RESOURCES_NOTICE_URL_MAPPING_FR_TXT = "/resources/notice_url_mapping_fr.txt";
 	
-	private static final String RESOURCES_ACTIVE_NOTICE_TXT = "/resources/active_notices.txt";
+	private static final String RESOURCES_ACTIVE_NOTICE_EN_TXT = "/resources/active_notices_en.txt";
+	
+	private static final String RESOURCES_ACTIVE_NOTICE_FR_TXT = "/resources/active_notices_fr.txt";
 
 	private static final String SERVICE_NOTICE_JSP = "serviceNotice.jsp";
 
@@ -50,11 +54,17 @@ public class ServiceNoticeServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
 	
-	private static final String[] tableColumnNames = new String[]{"Message", /*"URL","Public",*/"Start Time","Expiry Time",/*"Kiosk",*/"Status"};
+	private static final String[] messageListTableColumnNames = new String[]{"Message", /*"URL","Public",*/"Start Time","Expiry Time",/*"Kiosk",*/"Status"};
+	
+	private static final String[] messageLeaderBoardTableColumnNames = new String[]{"Message", /*"URL","Public",*/"Start Time","Expiry Time",/*"Kiosk",*/"Add It?"};
 	
 	private static ArrayList<Notice> enNoticeMappings = null;
 	
 	private static ArrayList<Notice> frNoticeMappings = null;
+	
+	private static ArrayList<Notice> activeNoticeEnMappings = null;
+	
+	private static ArrayList<Notice> activeNoticeFrMappings = null;
 	
 	private static String[] appEnvMappings = {"HTMLGENAPPURL" , "SERVICENOTICEGENAPPURL", "MOBILEGENAPPURL"};
 	
@@ -74,6 +84,9 @@ public class ServiceNoticeServlet extends HttpServlet {
 		super.init();
 		enNoticeMappings = NoticeMappingHandler.getInstance().initializeNoticeMapping(this.getServletContext().getRealPath(RESOURCES_NOTICE_URL_MAPPING_EN_TXT));
 		frNoticeMappings = NoticeMappingHandler.getInstance().initializeNoticeMapping(this.getServletContext().getRealPath(RESOURCES_NOTICE_URL_MAPPING_FR_TXT));
+		activeNoticeEnMappings = ActiveNoticeHandler.getInstance().readActiveNotices(this.getServletContext().getRealPath(RESOURCES_ACTIVE_NOTICE_EN_TXT));
+		activeNoticeFrMappings = ActiveNoticeHandler.getInstance().readActiveNotices(this.getServletContext().getRealPath(RESOURCES_ACTIVE_NOTICE_FR_TXT));
+		
 		noticeMap = initializeNoticeMap();
 		
 		appConfigMappings = initializeAppConfigMappings();
@@ -89,7 +102,7 @@ public class ServiceNoticeServlet extends HttpServlet {
 			Notice notice = (Notice) iterator.next();
 			noticeMap.put("fr_"+ notice.getKey()+"url", notice.getUrl());
 		}
-		System.out.println("noticeMap :: " + noticeMap);
+		//System.out.println("noticeMap :: " + noticeMap);
 		return noticeMap;
 	}
 
@@ -97,8 +110,8 @@ public class ServiceNoticeServlet extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		populateRequestAttributes(request);
 		
+		populateRequestAttributes(request);
 		request.getRequestDispatcher(SERVICE_NOTICE_JSP).forward(request, response);
 	}
 
@@ -107,12 +120,13 @@ public class ServiceNoticeServlet extends HttpServlet {
 		request.setAttribute("enNoticeMappings", enNoticeMappings);
 		request.setAttribute("frNoticeMappings", frNoticeMappings);
 		request.setAttribute("serverDateTime", getServerDateTime());
-		request.setAttribute("tableColumnNames", tableColumnNames);
+		request.setAttribute("messageListTableColumnNames", messageListTableColumnNames);
+		request.setAttribute("messageLeaderBoardTableColumnNames", messageLeaderBoardTableColumnNames);
+		
 		request.setAttribute("appConfigMappings", appConfigMappings);
 		request.setAttribute("noticeMap", noticeMap);
-		
-		ArrayList<Notice> activeNoticeMappings = ActiveNoticeHandler.getInstance().readActiveNotices(this.getServletContext().getRealPath(RESOURCES_ACTIVE_NOTICE_TXT));
-		request.setAttribute("activeNoticeMappings", activeNoticeMappings);
+		request.setAttribute("activeNoticeEnMappings", activeNoticeEnMappings);
+		request.setAttribute("activeNoticeFrMappings", activeNoticeFrMappings);
 		
 	}
 
@@ -123,10 +137,18 @@ public class ServiceNoticeServlet extends HttpServlet {
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException{
 		
-		boolean processingSuccessfulEn = writeToFile(ServiceNoticeJSGenerator.getInstance().generateCode(extractNoticesFromRequest(request, enNoticeMappings), this.getServletContext().getRealPath(SERVICE_NOTICE_JS_INIT_FILE)), SERVICENOTICE_JS_EN_PATH);
-		boolean processingSuccessfulFr = writeToFile(ServiceNoticeJSGenerator.getInstance().generateCode(extractNoticesFromRequest(request, frNoticeMappings), this.getServletContext().getRealPath(SERVICE_NOTICE_JS_INIT_FILE)), SERVICENOTICE_JS_FR_PATH);
+		activeNoticeEnMappings = appendToActiveNotices(activeNoticeEnMappings,extractNoticesFromRequest(request, enNoticeMappings));
+		activeNoticeFrMappings = appendToActiveNotices(activeNoticeFrMappings,extractNoticesFromRequest(request, frNoticeMappings));
 		
-		ActiveNoticeHandler.getInstance().updateActiveNotices(extractNoticesFromRequest(request, enNoticeMappings), this.getServletContext().getRealPath(RESOURCES_ACTIVE_NOTICE_TXT));
+		boolean processingSuccessfulEn = writeToFile(ServiceNoticeJSGenerator.getInstance().generateCode(activeNoticeEnMappings, this.getServletContext().getRealPath(SERVICE_NOTICE_JS_INIT_FILE)), SERVICENOTICE_JS_EN_PATH);
+		boolean processingSuccessfulFr = writeToFile(ServiceNoticeJSGenerator.getInstance().generateCode(activeNoticeFrMappings, this.getServletContext().getRealPath(SERVICE_NOTICE_JS_INIT_FILE)), SERVICENOTICE_JS_FR_PATH);
+		
+		ActiveNoticeHandler.getInstance().updateActiveNotices(activeNoticeEnMappings, this.getServletContext().getRealPath(RESOURCES_ACTIVE_NOTICE_EN_TXT));
+		ActiveNoticeHandler.getInstance().updateActiveNotices(activeNoticeFrMappings, this.getServletContext().getRealPath(RESOURCES_ACTIVE_NOTICE_FR_TXT));
+		
+		//if(null != activeNoticeEnMappings){
+			activeNoticeEnMappings = processActiveNoticesStatus(activeNoticeEnMappings);
+		//}
 		
 		request.setAttribute(PROCESSING_STATUS, processingSuccessfulEn && processingSuccessfulFr);
 		
@@ -151,6 +173,21 @@ public class ServiceNoticeServlet extends HttpServlet {
 		}
 		System.out.println("ServiceNoticeServlet.extractNoticesFromRequest():\n" + notices);
 		return notices;
+	}
+	
+	private ArrayList<Notice> appendToActiveNotices(ArrayList<Notice> activeNotices, ArrayList<Notice> newNotices){
+		//append the new notices to the existing one
+		if(activeNotices == null) {
+			activeNotices = new ArrayList<Notice>();
+		}
+		for (Iterator<Notice> iterator = newNotices.iterator(); iterator.hasNext();) {
+			Notice notice = (Notice) iterator.next();
+			if(!activeNotices.contains(notice)) { // Don't add duplicates
+				activeNotices.add(notice);
+			}
+		}
+		System.out.println("ServiceNoticeServlet.appendToActiveNotices() - updated list :: " + activeNotices);
+		return activeNotices;
 	}
 	
 	private String formatJSArray(String noticeKeyList) {
@@ -193,7 +230,7 @@ public class ServiceNoticeServlet extends HttpServlet {
 		Calendar serverTime = Calendar.getInstance(TimeZone.getDefault());
 		
 		SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
-		System.out.println(dateFormat.format(serverTime.getTime()));
+		//System.out.println(dateFormat.format(serverTime.getTime()));
 		return dateFormat.format(serverTime.getTime());
 	}
 	
@@ -207,10 +244,28 @@ public class ServiceNoticeServlet extends HttpServlet {
 		
 	}
 	
-	private void processActiveNotices(ArrayList<Notice> notices){
+	private ArrayList<Notice> processActiveNoticesStatus(ArrayList<Notice> notices){
 		Calendar serverTime = Calendar.getInstance(TimeZone.getTimeZone(TIMEZONE_AMERICA_TORONTO));
-		SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
-		System.out.println(dateFormat.format(serverTime.getTime()));
-		
+		Date serverTimeDate = serverTime.getTime();
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+		Date noticeStartTime = null;
+		Date noticeExpiryTime = null;
+		for (Iterator<Notice> iterator = notices.iterator(); iterator.hasNext();) {
+			Notice notice = (Notice) iterator.next();
+			try {
+				noticeStartTime = dateFormat.parse(notice.getStartTime());
+				noticeExpiryTime = dateFormat.parse(notice.getExpiryTime());
+			} catch (ParseException e) {
+				System.out.println("ServiceNoticeServlet.processActiveNoticesStatus() - ParseException" + e.getMessage());
+			}
+			if(serverTimeDate.after(noticeStartTime) && serverTimeDate.before(noticeExpiryTime)){
+				notice.setStatus("green");
+			}else if(serverTimeDate.before(noticeStartTime)){
+				notice.setStatus("grey");
+			}else{
+				notice.setStatus("red");
+			}
+		}
+		return notices;
 	}
 }

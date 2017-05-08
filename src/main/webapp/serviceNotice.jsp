@@ -98,21 +98,20 @@
 						<table class="table table-condensed table-bordered col-sm-8 bodyContentText">
 							<thead>
 								<tr>
-									<c:forEach var="columnName" items="${tableColumnNames}">
+									<c:forEach var="columnName" items="${messageListTableColumnNames}">
 										<th>${columnName}</th>
 									</c:forEach>
 								</tr>
 							</thead>
 							<tbody>
-								<c:forEach items="${activeNoticeMappings}" var="notice">
+								<c:forEach items="${activeNoticeEnMappings}" var="notice">
 									<tr>
 										<c:set var="noticeEnKeyUrl" value="${enKey}${notice.key}url"></c:set>
 										<c:set var="noticeFrKeyUrl" value="${frKey}${notice.key}url"></c:set>
-										<td><a href="${htmlGenAppUrl}?enFileName=${noticeMap[noticeEnKeyUrl]}&frFileName=${noticeMap[noticeFrKeyUrl]}&startTime={{ snCtrl.startTime${notice.key}}}&expiryTime={{ snCtrl.expiryTime${notice.key} }}">${notice.noticeText}</a></td>
-										<!-- <td><c:if test="${notice.publicInd}"><span class="glyphicon glyphicon-check"></span></c:if></td> -->
+										<td>${notice.noticeText}</td>
 										<td>${notice.startTime}</td>
 										<td>${notice.expiryTime}</td>
-										<td><input type="checkbox" name="isIncluded${notice.key}" ng-click="snCtrl.manageNotice('${notice.key}')" ng-model="checkBox${notice.key}" ng-disabled="serviceNoticeForm.startTime${notice.key}.$error.datetimelocal || !serviceNoticeForm.startTime${notice.key}.$dirty || !serviceNoticeForm.expiryTime${notice.key}.$dirty || serviceNoticeForm.expiryTime${notice.key}.$error.datetimelocal"/></td>
+										<td style="background-color: ${notice.status}"></td>
 									</tr>
 								</c:forEach>
 							</tbody>
@@ -128,7 +127,7 @@
 						<table class="table table-condensed table-bordered col-sm-8 bodyContentText">
 							<thead>
 								<tr>
-									<c:forEach var="columnName" items="${tableColumnNames}">
+									<c:forEach var="columnName" items="${messageLeaderBoardTableColumnNames}">
 										<th>${columnName}</th>
 									</c:forEach>
 								</tr>
