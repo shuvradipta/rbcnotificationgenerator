@@ -106,13 +106,25 @@
 							<tbody>
 								<c:forEach items="${activeNoticeEnMappings}" var="notice">
 									<tr>
-										<c:set var="noticeEnKeyUrl" value="${enKey}${notice.key}url"></c:set>
-										<c:set var="noticeFrKeyUrl" value="${frKey}${notice.key}url"></c:set>
-										<td>${notice.noticeText}</td>
+										<td><a href="javascript:document.updateServiceNoticeForm${notice.key}.submit();">${notice.noticeText}</a></td>
 										<td>${notice.startTime}</td>
 										<td>${notice.expiryTime}</td>
 										<td style="background-color: ${notice.status}"></td>
+										<td><a href="javascript:document.deleteServiceNoticeForm${notice.key}.submit();"><span class="glyphicon glyphicon-remove"></span></a></td>
 									</tr>
+									<form action="/ServiceNoticeServlet" method="post" name="deleteServiceNoticeForm${notice.key}">
+										<input type="hidden" name="key" value="${notice.key}" />
+										<input type="hidden" name="action" value="delete" />
+									</form>
+									<form action="/UpdateServiceNoticeServlet" method="post" name="updateServiceNoticeForm${notice.key}">
+										<input type="hidden" name="key" value="${notice.key}" />
+										<input type="hidden" name="startTime" value="${notice.startTime}" />
+										<input type="hidden" name="expiryTime" value="${notice.expiryTime}">
+										<input type="hidden" name="url" value="${notice.url}">
+										<input type="hidden" name="kioskInd" value="${notice.kioskInd}">
+										<input type="hidden" name="publicInd" value="${notice.publicInd}">
+										<input type="hidden" name="noticeText" value="${notice.noticeText}">
+									</form>
 								</c:forEach>
 							</tbody>
 						</table>

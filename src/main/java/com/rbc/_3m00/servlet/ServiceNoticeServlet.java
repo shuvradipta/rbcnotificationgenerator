@@ -54,7 +54,7 @@ public class ServiceNoticeServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
 	
-	private static final String[] messageListTableColumnNames = new String[]{"Message", /*"URL","Public",*/"Start Time","Expiry Time",/*"Kiosk",*/"Status"};
+	private static final String[] messageListTableColumnNames = new String[]{"Message", "Start Time","Expiry Time",/*"Kiosk",*/"Status", "Actions"};
 	
 	private static final String[] messageLeaderBoardTableColumnNames = new String[]{"Message", /*"URL","Public",*/"Start Time","Expiry Time",/*"Kiosk",*/"Add It?"};
 	
@@ -110,7 +110,8 @@ public class ServiceNoticeServlet extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		
+		if(null != activeNoticeEnMappings)
+			activeNoticeEnMappings = processActiveNoticesStatus(activeNoticeEnMappings);
 		populateRequestAttributes(request);
 		request.getRequestDispatcher(SERVICE_NOTICE_JSP).forward(request, response);
 	}
@@ -137,18 +138,20 @@ public class ServiceNoticeServlet extends HttpServlet {
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException{
 		
-		activeNoticeEnMappings = appendToActiveNotices(activeNoticeEnMappings,extractNoticesFromRequest(request, enNoticeMappings));
-		activeNoticeFrMappings = appendToActiveNotices(activeNoticeFrMappings,extractNoticesFromRequest(request, frNoticeMappings));
+		
+		
+		if( "delete".equalsIgnoreCase(request.getParameter("action")) ){
+			doDelete(request, response);
+		}else{
+			activeNoticeEnMappings = appendToActiveNotices(activeNoticeEnMappings,extractNoticesFromRequest(request, enNoticeMappings));
+			activeNoticeFrMappings = appendToActiveNotices(activeNoticeFrMappings,extractNoticesFromRequest(request, frNoticeMappings));
+		}
 		
 		boolean processingSuccessfulEn = writeToFile(ServiceNoticeJSGenerator.getInstance().generateCode(activeNoticeEnMappings, this.getServletContext().getRealPath(SERVICE_NOTICE_JS_INIT_FILE)), SERVICENOTICE_JS_EN_PATH);
 		boolean processingSuccessfulFr = writeToFile(ServiceNoticeJSGenerator.getInstance().generateCode(activeNoticeFrMappings, this.getServletContext().getRealPath(SERVICE_NOTICE_JS_INIT_FILE)), SERVICENOTICE_JS_FR_PATH);
 		
 		ActiveNoticeHandler.getInstance().updateActiveNotices(activeNoticeEnMappings, this.getServletContext().getRealPath(RESOURCES_ACTIVE_NOTICE_EN_TXT));
 		ActiveNoticeHandler.getInstance().updateActiveNotices(activeNoticeFrMappings, this.getServletContext().getRealPath(RESOURCES_ACTIVE_NOTICE_FR_TXT));
-		
-		//if(null != activeNoticeEnMappings){
-			activeNoticeEnMappings = processActiveNoticesStatus(activeNoticeEnMappings);
-		//}
 		
 		request.setAttribute(PROCESSING_STATUS, processingSuccessfulEn && processingSuccessfulFr);
 		
@@ -159,7 +162,7 @@ public class ServiceNoticeServlet extends HttpServlet {
 	private ArrayList<Notice> extractNoticesFromRequest(HttpServletRequest request, ArrayList<Notice> noticeMappings){
 		ArrayList<Notice> notices = new ArrayList<Notice>();
 		String noticeKeyList = formatJSArray(request.getParameter("noticeKeyList").trim());
-		System.out.println("ServiceNoticeServlet.extractNoticesFromRequest() - noticeKeyList ::" + noticeKeyList);
+		//System.out.println("ServiceNoticeServlet.extractNoticesFromRequest() - noticeKeyList ::" + noticeKeyList);
 		String[] noticeKeys = noticeKeyList.split(",");
 		for (int i = 0; i < noticeKeys.length; i++) {
 			for (Notice notice : noticeMappings) {
@@ -171,10 +174,26 @@ public class ServiceNoticeServlet extends HttpServlet {
 				}
 			}
 		}
-		System.out.println("ServiceNoticeServlet.extractNoticesFromRequest():\n" + notices);
+		//System.out.println("ServiceNoticeServlet.extractNoticesFromRequest():\n" + notices);
 		return notices;
 	}
 	
+	@Override
+	protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		String noticeKey = req.getParameter("key");
+		Notice removalNotice = null;
+		if(null != noticeKey && !"".equals(noticeKey.trim())) {
+			removalNotice = new Notice();
+			removalNotice.setKey(noticeKey);
+		}
+		boolean enDeleteSuccessful = ActiveNoticeHandler.getInstance().deleteActiveNotices(activeNoticeEnMappings, removalNotice, this.getServletContext().getRealPath(RESOURCES_ACTIVE_NOTICE_EN_TXT));
+		boolean frDeleteSuccessful = ActiveNoticeHandler.getInstance().deleteActiveNotices(activeNoticeFrMappings, removalNotice, this.getServletContext().getRealPath(RESOURCES_ACTIVE_NOTICE_FR_TXT));
+		
+		if(!enDeleteSuccessful || !frDeleteSuccessful){
+			System.out.println("ServiceNoticeServlet.doDelete() - some issue while trying to delete " + noticeKey);
+		}
+	}
+
 	private ArrayList<Notice> appendToActiveNotices(ArrayList<Notice> activeNotices, ArrayList<Notice> newNotices){
 		//append the new notices to the existing one
 		if(activeNotices == null) {
@@ -239,7 +258,7 @@ public class ServiceNoticeServlet extends HttpServlet {
 		for (String envVar : appEnvMappings) {
 			appUrlMappings.put(envVar, System.getenv(envVar));
 		}
-		System.out.println("ServiceNoticeServlet.initializeAppConfigMappings() :: " + appUrlMappings);
+		//System.out.println("ServiceNoticeServlet.initializeAppConfigMappings() :: " + appUrlMappings);
 		return appUrlMappings;
 		
 	}

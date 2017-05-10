@@ -54,6 +54,25 @@ public class ActiveNoticeHandler {
 		}
 		return activeNotices;
 	}
+	
+	public boolean deleteActiveNotices(ArrayList<Notice> notices, Notice removalNotice, String filePath){
+		
+		System.out.println("ActiveNoticeHandler.deleteActiveNotices() - Notice to be deleted :: " + removalNotice);
+		if(null != notices){
+			notices.remove(removalNotice);
+		}
+		try {
+			FileOutputStream fos = new FileOutputStream(new File(filePath));
+			ObjectOutputStream os = new ObjectOutputStream(fos);
+			os.writeObject(notices);
+			os.flush();
+			os.close();
+		} catch (IOException e) {
+			System.out.println("ActiveNoticeHandler.updateActiveNotices() - IOException while closing writer"  + e.getMessage());
+			return false;
+		}
+		return true;
+	}
 
 	
 }
